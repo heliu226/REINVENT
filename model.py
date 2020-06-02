@@ -111,12 +111,9 @@ class RNN():
         # concatenate sequences and optionally decode
         sequences = torch.cat(sequences, 1)
         if return_smiles:
-            smiles = [self.voc.decode(seq.cpu().numpy()) for \
-                      seq in sequences]
-            return smiles
-        else:
-            return sequences
-
+            sequences = [self.voc.decode(seq.cpu().numpy()) for \
+                         seq in sequences]
+        
         return sequences.data, log_probs, entropy
 
 def NLLLoss(inputs, targets):
