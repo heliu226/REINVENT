@@ -44,22 +44,22 @@ def pretrain(restore_from=None):
     # Read vocabulary from a file
     voc_file = os.path.join(args.input_dir, 'Voc')
     voc = Vocabulary(init_from_file=voc_file)
-
+    
     # Create a Dataset from a SMILES file
     mol_file = os.path.join(args.input_dir, 'mols_filtered.smi')
     moldata = MolData(mol_file, voc)
     data = DataLoader(moldata, batch_size=128, shuffle=True, drop_last=True,
                       collate_fn=MolData.collate_fn)
-
+    
     Prior = RNN(voc)
-
+    
     # Can restore from a saved RNN
     if restore_from:
         Prior.rnn.load_state_dict(torch.load(restore_from))
-
+    
     # set up early stopping
     early_stop = EarlyStopping(patience=args.patience)
-
+    
     optimizer = torch.optim.Adam(Prior.rnn.parameters(), lr = 0.001)
     counter = 0
     log_every_steps = 50
@@ -73,24 +73,24 @@ def pretrain(restore_from=None):
         for step, batch in tqdm(enumerate(data), total=len(data)):
             # increment counter
             counter += 1
-
+            
             # Sample from DataLoader
             seqs = batch.long()
-
+            
             # Calculate loss
             log_p, _ = Prior.likelihood(seqs)
             loss = - log_p.mean()
-
+            
             # Calculate gradients and take a step
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            
             # Every 500 steps we decrease learning rate and print some information
             if step % 500 == 0 and step != 0:
                 decrease_learning_rate(optimizer, decrease_by=0.03)
                 tqdm.write("*" * 50)
-                tqdm.write("Epoch {:3d}   step {:3d}    loss: {:5.2f}\n".format(epoch, step, loss.data[0]))
+                tqdm.write("Epoch {:3d}   step {:3d}    loss: {:5.2f}\n".format(epoch, step, loss.item()))
                 seqs, likelihood, _ = Prior.sample(128)
                 valid = 0
                 for i, seq in enumerate(seqs.cpu().numpy()):
@@ -109,7 +109,7 @@ def pretrain(restore_from=None):
             if counter % sample_every_steps == 0:
                 sample_smiles(args.output_dir, args.seed, Prior, 
                               args.sample_size, epoch, counter)
-
+            
             # check early stopping
             validation = moldata.get_validation(128).long()
             validation_logp, _ = Prior.likelihood(validation)
@@ -117,16 +117,16 @@ def pretrain(restore_from=None):
             model_filename = "Prior.ckpt"
             model_file = os.path.join(args.output_dir, model_filename)
             early_stop(validation_loss.item(), Prior, model_file, counter)
-        
+            
             if early_stop.stop:
                 break
-
+        
         # log and sample SMILES every epoch
         track_loss(sched_file, Prior, moldata, epoch,
                    counter, loss.item(), 128)
         sample_smiles(args.output_dir, args.seed, Prior, 
                       args.sample_size, epoch, counter)
-
+    
     # append information about final training step
     sched = pd.DataFrame({'epoch': [None],
                           'step': [early_stop.step_at_best],
