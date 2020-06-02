@@ -68,7 +68,7 @@ class RNN():
             entropy += -torch.sum((log_prob * prob), 1)
         return log_probs, entropy
 
-    def sample(self, batch_size, max_length=140):
+    def sample(self, batch_size, max_length=140, return_smiles=False):
         """
             Sample a batch of sequences
 
@@ -108,7 +108,15 @@ class RNN():
             finished = torch.ge(finished + EOS_sampled, 1)
             if torch.prod(finished) == 1: break
 
+        # concatenate sequences and optionally decode
         sequences = torch.cat(sequences, 1)
+        if return_smiles:
+            smiles = [self.voc.decode(seq.cpu().numpy()) for \
+                      seq in sequences]
+            return smiles
+        else:
+            return sequences
+
         return sequences.data, log_probs, entropy
 
 def NLLLoss(inputs, targets):
