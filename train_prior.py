@@ -107,7 +107,7 @@ def pretrain(restore_from=None):
                 track_loss(sched_file, Prior, moldata, epoch, 
                            counter, loss.item(), 128)
             if counter % sample_every_steps == 0:
-                sample_smiles(args.output_dir, args.sample_idx, Prior, 
+                sample_smiles(args.output_dir, args.seed, Prior, 
                               args.sample_size, epoch, counter)
 
             # check early stopping
@@ -124,7 +124,7 @@ def pretrain(restore_from=None):
         # log and sample SMILES every epoch
         track_loss(sched_file, Prior, moldata, epoch,
                    counter, loss.item(), 128)
-        sample_smiles(args.output_dir, args.sample_idx, Prior, 
+        sample_smiles(args.output_dir, args.seed, Prior, 
                       args.sample_size, epoch, counter)
 
     # append information about final training step
