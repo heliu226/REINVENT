@@ -102,13 +102,13 @@ def pretrain(restore_from=None):
             # log and sample SMILES every n steps
             if counter % log_every_steps == 0:
                 track_loss(sched_file, Prior, moldata, epoch, 
-                           counter, loss.item(), args.batch_size)
+                           counter, loss.item(), 128)
             if counter % sample_every_steps == 0:
                 sample_smiles(args.output_dir, args.sample_idx, Prior, 
                               args.sample_size, epoch, counter)
 
             # check early stopping
-            validation, lengths = moldata.get_validation(args.batch_size)
+            validation, lengths = moldata.get_validation(128)
             validation_loss = Prior.loss(validation, lengths).mean().detach()
             model_filename = "Ptiot.ckpt"
             model_file = os.path.join(args.output_dir, model_filename)
@@ -119,7 +119,7 @@ def pretrain(restore_from=None):
 
         # log and sample SMILES every epoch
         track_loss(sched_file, Prior, moldata, epoch,
-                   counter, loss.item(), args.batch_size)
+                   counter, loss.item(), 128)
         sample_smiles(args.output_dir, args.sample_idx, Prior, 
                       args.sample_size, epoch, counter)
 
