@@ -54,4 +54,4 @@ class EarlyStopping():
                 self.save_model(model, output_file)
     
     def save_model(self, model, output_file):
-        torch.save(model.state_dict(), output_file)
+        torch.save(model.rnn.state_dict(), output_file)
