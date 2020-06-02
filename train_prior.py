@@ -26,6 +26,7 @@ parser.add_argument('--input_dir', type=str)
 parser.add_argument('--output_dir', type=str)
 parser.add_argument('--sample_size', type=int, default=10000)
 parser.add_argument('--patience', type=int, default=10000)
+parser.add_argument('--seed', type=int, default=0)
 args = parser.parse_args()
 
 def pretrain(restore_from=None):
@@ -129,6 +130,4 @@ def pretrain(restore_from=None):
                           'value': [early_stop.best_loss]})
     sched.to_csv(sched_file, index=False, mode='a', header=False)
 
-
-if __name__ == "__main__":
-    pretrain()
+pretrain()
