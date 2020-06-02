@@ -37,7 +37,7 @@ def pretrain(restore_from=None):
     np.random.seed(args.seed)
     if torch.cuda.is_available(): 
         torch.cuda.manual_seed_all(args.seed)
-
+    
     # Read vocabulary from a file
     voc_file = os.path.join(args.input_dir, 'Voc')
     voc = Vocabulary(init_from_file=voc_file)

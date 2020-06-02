@@ -86,15 +86,26 @@ class MolData(Dataset):
         Returns:
                 A custom PyTorch dataset for training the Prior.
     """
-    def __init__(self, fname, voc):
+    def __init__(self, fname, voc, training_split=0.95):
         self.voc = voc
         self.smiles = []
         with open(fname, 'r') as f:
             for line in f:
                 self.smiles.append(line.split()[0])
-
+        
+        # split into training and validation sets
+        np.random.seed(0)
+        n_smiles = len(self.smiles)
+        split = np.random.choice(range(n_smiles), 
+                                 size=int(n_smiles * training_split),
+                                 replace=False)
+        self.training = [self.smiles[idx] for idx in \
+                         range(len(self.smiles)) if idx in split]
+        self.validation = [self.smiles[idx] for idx in \
+                           range(len(self.smiles)) if not idx in split]
+    
     def __getitem__(self, i):
-        mol = self.smiles[i]
+        mol = self.training[i]
         tokenized = self.voc.tokenize(mol)
         encoded = self.voc.encode(tokenized)
         return Variable(encoded)
@@ -108,7 +119,7 @@ class MolData(Dataset):
         return self.collate_fn(encoded)
     
     def __len__(self):
-        return len(self.smiles)
+        return len(self.training)
 
     def __str__(self):
         return "Dataset containing {} structures.".format(len(self))
