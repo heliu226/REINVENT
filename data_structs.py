@@ -1,10 +1,9 @@
+import os
+
 import numpy as np
-import random
 import re
-import pickle
 from rdkit import Chem
 import sys
-import time
 import torch
 from torch.utils.data import Dataset
 
@@ -288,7 +287,7 @@ def combine_voc_from_files(fnames):
         for char in chars:
             f.write(char + "\n")
 
-def construct_vocabulary(smiles_list):
+def construct_vocabulary(smiles_list, vocab_file):
     """Returns all the characters present in a SMILES file.
        Uses regex to find characters/tokens of the format '[x]'."""
     add_chars = set()
@@ -304,15 +303,21 @@ def construct_vocabulary(smiles_list):
                 [add_chars.add(unit) for unit in chars]
 
     print("Number of characters: {}".format(len(add_chars)))
-    with open('data/Voc', 'w') as f:
+    with open(vocab_file, 'w') as f:
         for char in add_chars:
             f.write(char + "\n")
     return add_chars
 
 if __name__ == "__main__":
     smiles_file = sys.argv[1]
+    output_dir = sys.argv[2]
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+    
     print("Reading smiles...")
     smiles_list = canonicalize_smiles_from_file(smiles_file)
     print("Constructing vocabulary...")
+    voc_file = os.path.join(output_dir, 'Voc')
     voc_chars = construct_vocabulary(smiles_list)
-    write_smiles_to_file(smiles_list, "data/mols_filtered.smi")
+    output_file = os.path.join(output_dir, 'mols_filtered.smi')
+    write_smiles_to_file(smiles_list, output_dir)
