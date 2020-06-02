@@ -114,7 +114,7 @@ class MolData(Dataset):
         validation_size = len(self.validation)
         idxs = np.random.choice(np.asarray(range(validation_size)),
                                 size=n_smiles)
-        encoded = [Variable(self.vocabulary.encode(self.vocabulary.tokenize(
+        encoded = [Variable(self.voc.encode(self.voc.tokenize(
                    self.validation[idx]))) for idx in idxs]
         return self.collate_fn(encoded)
     

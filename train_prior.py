@@ -29,6 +29,9 @@ parser.add_argument('--patience', type=int, default=10000)
 parser.add_argument('--seed', type=int, default=0)
 args = parser.parse_args()
 
+if not os.path.isdir(args.output_dir):
+    os.makedir(args.output_dir)
+
 def pretrain(restore_from=None):
     """Trains the Prior RNN"""
     ## seed all RNGs for reproducible output
