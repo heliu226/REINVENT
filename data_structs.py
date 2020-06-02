@@ -320,4 +320,4 @@ if __name__ == "__main__":
     voc_file = os.path.join(output_dir, 'Voc')
     voc_chars = construct_vocabulary(smiles_list, voc_file)
     output_file = os.path.join(output_dir, 'mols_filtered.smi')
-    write_smiles_to_file(smiles_list, output_dir)
+    write_smiles_to_file(smiles_list, output_file)
