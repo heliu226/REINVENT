@@ -30,7 +30,7 @@ parser.add_argument('--seed', type=int, default=0)
 args = parser.parse_args()
 
 if not os.path.isdir(args.output_dir):
-    os.makedir(args.output_dir)
+    os.makedirs(args.output_dir)
 
 def pretrain(restore_from=None):
     """Trains the Prior RNN"""
@@ -111,8 +111,8 @@ def pretrain(restore_from=None):
                               args.sample_size, epoch, counter)
 
             # check early stopping
-            validation, lengths = moldata.get_validation(128)
-            validation_loss = Prior.loss(validation, lengths).mean().detach()
+            validation = moldata.get_validation(128)
+            validation_loss = Prior.likelihood(validation).mean().detach()
             model_filename = "Ptiot.ckpt"
             model_file = os.path.join(args.output_dir, model_filename)
             early_stop(validation_loss.item(), Prior, model_file, counter)
