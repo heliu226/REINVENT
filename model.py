@@ -113,8 +113,10 @@ class RNN():
         if return_smiles:
             sequences = [self.voc.decode(seq.cpu().numpy()) for \
                          seq in sequences]
+        else:
+            sequences = sequences.data
         
-        return sequences.data, log_probs, entropy
+        return sequences, log_probs, entropy
 
 def NLLLoss(inputs, targets):
     """
