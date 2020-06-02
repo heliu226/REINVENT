@@ -98,7 +98,15 @@ class MolData(Dataset):
         tokenized = self.voc.tokenize(mol)
         encoded = self.voc.encode(tokenized)
         return Variable(encoded)
-
+    
+    def get_validation(self, n_smiles):
+        validation_size = len(self.validation)
+        idxs = np.random.choice(np.asarray(range(validation_size)),
+                                size=n_smiles)
+        encoded = [Variable(self.vocabulary.encode(self.vocabulary.tokenize(
+                   self.validation[idx]))) for idx in idxs]
+        return self.collate_fn(encoded)
+    
     def __len__(self):
         return len(self.smiles)
 
