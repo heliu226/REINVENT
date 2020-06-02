@@ -111,7 +111,7 @@ def pretrain(restore_from=None):
                               args.sample_size, epoch, counter)
 
             # check early stopping
-            validation = moldata.get_validation(128)
+            validation = moldata.get_validation(128).long()
             validation_loss = Prior.likelihood(validation).mean().detach()
             model_filename = "Ptiot.ckpt"
             model_file = os.path.join(args.output_dir, model_filename)
