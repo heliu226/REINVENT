@@ -26,6 +26,7 @@ parser.add_argument('--input_dir', type=str)
 parser.add_argument('--output_dir', type=str)
 parser.add_argument('--sample_size', type=int, default=10000)
 parser.add_argument('--patience', type=int, default=10000)
+parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--seed', type=int, default=0)
 args = parser.parse_args()
 
@@ -48,8 +49,8 @@ def pretrain(restore_from=None):
     # Create a Dataset from a SMILES file
     mol_file = os.path.join(args.input_dir, 'mols_filtered.smi')
     moldata = MolData(mol_file, voc)
-    data = DataLoader(moldata, batch_size=128, shuffle=True, drop_last=True,
-                      collate_fn=MolData.collate_fn)
+    data = DataLoader(moldata, batch_size=args.batch_size, shuffle=True,
+                      drop_last=True, collate_fn=MolData.collate_fn)
     
     Prior = RNN(voc)
     
@@ -91,7 +92,7 @@ def pretrain(restore_from=None):
                 decrease_learning_rate(optimizer, decrease_by=0.03)
                 tqdm.write("*" * 50)
                 tqdm.write("Epoch {:3d}   step {:3d}    loss: {:5.2f}\n".format(epoch, step, loss.item()))
-                seqs, likelihood, _ = Prior.sample(128)
+                seqs, likelihood, _ = Prior.sample(args.batch_size)
                 valid = 0
                 for i, seq in enumerate(seqs.cpu().numpy()):
                     smile = voc.decode(seq)
@@ -105,13 +106,13 @@ def pretrain(restore_from=None):
             # log and sample SMILES every n steps
             if counter % log_every_steps == 0:
                 track_loss(sched_file, Prior, moldata, epoch, 
-                           counter, loss.item(), 128)
+                           counter, loss.item(), args.batch_size)
             if counter % sample_every_steps == 0:
                 sample_smiles(args.output_dir, args.seed, Prior, 
                               args.sample_size, epoch, counter)
             
             # check early stopping
-            validation = moldata.get_validation(128).long()
+            validation = moldata.get_validation(args.batch_size).long()
             validation_logp, _ = Prior.likelihood(validation)
             validation_loss = validation_logp.mean().detach()
             model_filename = "Prior.ckpt"
@@ -123,7 +124,7 @@ def pretrain(restore_from=None):
         
         # log and sample SMILES every epoch
         track_loss(sched_file, Prior, moldata, epoch,
-                   counter, loss.item(), 128)
+                   counter, loss.item(), args.batch_size)
         sample_smiles(args.output_dir, args.seed, Prior, 
                       args.sample_size, epoch, counter)
     

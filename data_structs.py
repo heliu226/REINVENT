@@ -103,6 +103,9 @@ class MolData(Dataset):
                          range(len(self.smiles)) if idx in split]
         self.validation = [self.smiles[idx] for idx in \
                            range(len(self.smiles)) if not idx in split]
+        
+        # now, we can remove smiles from memory
+        self.smiles = split = None
     
     def __getitem__(self, i):
         mol = self.training[i]
