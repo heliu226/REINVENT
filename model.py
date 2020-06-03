@@ -89,11 +89,9 @@ class RNN():
 
         sequences = []
         log_probs = Variable(torch.zeros(batch_size))
-        finished = torch.zeros(batch_size).byte()
+        finished = Variable(torch.zeros(batch_size).byte())
         entropy = Variable(torch.zeros(batch_size))
-        if torch.cuda.is_available():
-            finished = finished.cuda()
-
+        
         for step in range(max_length):
             logits, h = self.rnn(x, h)
             prob = F.softmax(logits)
