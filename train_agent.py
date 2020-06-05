@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import argparse
+
 import torch
 import pickle
 import numpy as np
@@ -13,6 +15,15 @@ from scoring_functions import get_scoring_function
 from utils import Variable, seq_to_smiles, fraction_valid_smiles, unique
 from vizard_logger import VizardLog
 
+# CLI
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_dir', type=str)
+parser.add_argument('--output_dir', type=str)
+parser.add_argument('--sample_size', type=int, default=10000)
+parser.add_argument('--patience', type=int, default=10000)
+parser.add_argument('--seed', type=int, default=0)
+args = parser.parse_args()
+
 def train_agent(restore_prior_from='data/Prior.ckpt',
                 restore_agent_from='data/Prior.ckpt',
                 scoring_function='tanimoto',
@@ -20,7 +31,10 @@ def train_agent(restore_prior_from='data/Prior.ckpt',
                 save_dir=None, learning_rate=0.0005,
                 batch_size=64, n_steps=3000,
                 num_processes=0, sigma=60,
-                experience_replay=0):
+                experience_replay=0,
+                # new parameters
+                
+                ):
 
     voc = Vocabulary(init_from_file="data/Voc")
 
@@ -114,7 +128,7 @@ def train_agent(restore_prior_from='data/Prior.ckpt',
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        
         # Convert to numpy arrays so that we can print them
         augmented_likelihood = augmented_likelihood.data.cpu().numpy()
         agent_likelihood = agent_likelihood.data.cpu().numpy()
