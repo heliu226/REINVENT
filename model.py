@@ -83,7 +83,7 @@ class RNN():
                                     currently used.
         """
         # turn on evaluation mode
-        self.eval();
+        self.rnn.eval();
         with torch.no_grad():
             start_token = Variable(torch.zeros(batch_size).long())
             start_token[:] = self.voc.vocab['GO']
@@ -118,7 +118,7 @@ class RNN():
                 sequences = sequences.data
         
         # restore training mode
-        self.train();
+        self.rnn.train();
         # return
         return sequences, log_probs, entropy
 
