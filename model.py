@@ -82,38 +82,44 @@ class RNN():
             entropy: (batch_size) The entropies for the sequences. Not
                                     currently used.
         """
-        start_token = Variable(torch.zeros(batch_size).long())
-        start_token[:] = self.voc.vocab['GO']
-        h = self.rnn.init_h(batch_size)
-        x = start_token
-
-        sequences = []
-        log_probs = Variable(torch.zeros(batch_size))
-        finished = Variable(torch.zeros(batch_size).byte())
-        entropy = Variable(torch.zeros(batch_size))
+        # turn on evaluation mode
+        self.eval();
+        with torch.no_grad():
+            start_token = Variable(torch.zeros(batch_size).long())
+            start_token[:] = self.voc.vocab['GO']
+            h = self.rnn.init_h(batch_size)
+            x = start_token
+    
+            sequences = []
+            log_probs = Variable(torch.zeros(batch_size))
+            finished = Variable(torch.zeros(batch_size).byte())
+            entropy = Variable(torch.zeros(batch_size))
+            
+            for step in range(max_length):
+                logits, h = self.rnn(x, h)
+                prob = F.softmax(logits)
+                log_prob = F.log_softmax(logits)
+                x = torch.multinomial(prob, 1).view(-1)
+                sequences.append(x.view(-1, 1))
+                log_probs +=  NLLLoss(log_prob, x)
+                entropy += -torch.sum((log_prob * prob), 1)
+    
+                x = Variable(x.data)
+                EOS_sampled = (x == self.voc.vocab['EOS']).data
+                finished = torch.ge(finished + EOS_sampled, 1)
+                if torch.prod(finished) == 1: break
+    
+            # concatenate sequences and optionally decode
+            sequences = torch.cat(sequences, 1)
+            if return_smiles:
+                sequences = [self.voc.decode(seq.cpu().numpy()) for \
+                             seq in sequences]
+            else:
+                sequences = sequences.data
         
-        for step in range(max_length):
-            logits, h = self.rnn(x, h)
-            prob = F.softmax(logits)
-            log_prob = F.log_softmax(logits)
-            x = torch.multinomial(prob, 1).view(-1)
-            sequences.append(x.view(-1, 1))
-            log_probs +=  NLLLoss(log_prob, x)
-            entropy += -torch.sum((log_prob * prob), 1)
-
-            x = Variable(x.data)
-            EOS_sampled = (x == self.voc.vocab['EOS']).data
-            finished = torch.ge(finished + EOS_sampled, 1)
-            if torch.prod(finished) == 1: break
-
-        # concatenate sequences and optionally decode
-        sequences = torch.cat(sequences, 1)
-        if return_smiles:
-            sequences = [self.voc.decode(seq.cpu().numpy()) for \
-                         seq in sequences]
-        else:
-            sequences = sequences.data
-        
+        # restore training mode
+        self.train();
+        # return
         return sequences, log_probs, entropy
 
 def NLLLoss(inputs, targets):
