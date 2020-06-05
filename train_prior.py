@@ -106,7 +106,7 @@ def pretrain(restore_from=None):
             # log and sample SMILES every n steps
             if counter % log_every_steps == 0:
                 track_loss(sched_file, Prior, moldata, epoch, 
-                           counter, loss.item(), args.batch_size)
+                           counter, -loss.item(), args.batch_size)
             if counter % sample_every_steps == 0:
                 sample_smiles(args.output_dir, args.seed, Prior, 
                               args.sample_size, epoch, counter)
