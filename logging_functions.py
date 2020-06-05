@@ -49,7 +49,8 @@ def sample_smiles(output_dir, sample_idx, model, sample_size, epoch,
     
     sampled_smiles = []
     while len(sampled_smiles) < sample_size:
-        sampled_smiles.extend(model.sample(100, return_smiles=True))
+        smiles, log_probs, entropy = model.sample(128, return_smiles=True)
+        sampled_smiles.extend(smiles)
     
     # set up output filename
     if step_idx == "NA": 
