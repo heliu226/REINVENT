@@ -107,9 +107,9 @@ def pretrain(restore_from=None):
             if counter % log_every_steps == 0:
                 track_loss(sched_file, Prior, moldata, epoch, 
                            counter, loss.item(), args.batch_size)
-#            if counter % sample_every_steps == 0:
-#                sample_smiles(args.output_dir, args.seed, Prior, 
-#                              args.sample_size, epoch, counter)
+            if counter % sample_every_steps == 0:
+                sample_smiles(args.output_dir, args.seed, Prior, 
+                              args.sample_size, epoch, counter)
             
             # check early stopping
             validation = moldata.get_validation(args.batch_size).long()
@@ -125,8 +125,8 @@ def pretrain(restore_from=None):
         # log and sample SMILES every epoch
         track_loss(sched_file, Prior, moldata, epoch,
                    counter, loss.item(), args.batch_size)
-#        sample_smiles(args.output_dir, args.seed, Prior, 
-#                      args.sample_size, epoch, counter)
+        sample_smiles(args.output_dir, args.seed, Prior, 
+                      args.sample_size, epoch, counter)
     
     # append information about final training step
     sched = pd.DataFrame({'epoch': [None],
