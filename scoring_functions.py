@@ -5,6 +5,7 @@ from rdkit import Chem
 from rdkit import rdBase
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
+from sklearn import svm
 import time
 import pickle
 import re
