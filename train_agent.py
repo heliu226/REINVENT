@@ -45,12 +45,12 @@ def train_agent(scoring_function_kwargs=None,
     
     voc_file = os.path.join(args.input_dir, 'Voc')
     voc = Vocabulary(init_from_file=voc_file)
-
+    
     start_time = time.time()
-
+    
     Prior = RNN(voc)
     Agent = RNN(voc)
-
+    
     logger = VizardLog('data/logs')
 
     # By default restore Agent to same model as Prior, but can restore from already trained Agent too.
@@ -65,10 +65,16 @@ def train_agent(scoring_function_kwargs=None,
                                              storage, loc: storage))
         Agent.rnn.load_state_dict(torch.load(prior_file, map_location=lambda \
                                              storage, loc: storage))
+        
+    Prior.rnn.eval();
+    Agent.rnn.train();
 
     # We dont need gradients with respect to Prior
     for param in Prior.rnn.parameters():
         param.requires_grad = False
+    # ...but we do for the agent
+    for param in Agent.rnn.parameters():
+        param.requires_grad = True
 
     optimizer = torch.optim.Adam(Agent.rnn.parameters(), lr=0.0005)
 
@@ -81,7 +87,7 @@ def train_agent(scoring_function_kwargs=None,
     scoring_function = get_scoring_function(scoring_function=args.scoring_function, 
                                             num_processes=num_processes,
                                             **scoring_function_kwargs)
-
+    
     # For policy based RL, we normally train on-policy and correct for the fact that more likely actions
     # occur more often (which means the agent can get biased towards them). Using experience replay is
     # therefor not as theoretically sound as it is for value based RL, but it seems to work well.
@@ -93,10 +99,10 @@ def train_agent(scoring_function_kwargs=None,
     logger.log(Agent.rnn.embedding.weight.cpu().data.numpy()[::30], "init_weight_GRU_embedding")
     logger.log(Agent.rnn.gru_2.bias_ih.cpu().data.numpy(), "init_weight_GRU_layer_2_b_ih")
     logger.log(Agent.rnn.gru_2.bias_hh.cpu().data.numpy(), "init_weight_GRU_layer_2_b_hh")
-
+    
     # Information for the logger
     step_score = [[], []]
-
+    
     print("Model initialized, starting training...")
 
     sample_every_steps = 50
@@ -110,12 +116,12 @@ def train_agent(scoring_function_kwargs=None,
         seqs = seqs[unique_idxs]
         agent_likelihood = agent_likelihood[unique_idxs]
         entropy = entropy[unique_idxs]
-
+        
         # Get prior likelihood and score
         prior_likelihood, _ = Prior.likelihood(Variable(seqs))
         smiles = seq_to_smiles(seqs, voc)
         score = scoring_function(smiles)
-
+         
         # Calculate augmented likelihood
         augmented_likelihood = prior_likelihood + sigma * Variable(score)
         loss = torch.pow((augmented_likelihood - agent_likelihood), 2)
