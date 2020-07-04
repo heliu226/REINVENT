@@ -5,9 +5,8 @@ from rdkit import Chem
 from rdkit import rdBase
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
-from sklearn import svm
+from joblib import load
 import time
-import pickle
 import re
 import threading
 import pexpect
@@ -70,9 +69,8 @@ class activity_model():
     clf_path = 'data/clf.pkl'
 
     def __init__(self):
-        with open(self.clf_path, "rb") as f:
-            self.clf = pickle.load(f)
-
+        self.clf = load(self.clf_path)
+    
     def __call__(self, smile):
         mol = Chem.MolFromSmiles(smile)
         if mol:
