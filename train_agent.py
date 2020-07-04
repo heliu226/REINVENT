@@ -109,7 +109,8 @@ def train_agent(scoring_function_kwargs=None,
     for step in range(args.n_steps):
 
         # Sample from Agent
-        seqs, agent_likelihood, entropy = Agent.sample(batch_size)
+        seqs, agent_likelihood, entropy = Agent.sample(batch_size, 
+                                                       enable_grad=True)
 
         # Remove duplicates, ie only consider unique seqs
         unique_idxs = unique(seqs)

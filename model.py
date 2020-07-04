@@ -68,7 +68,8 @@ class RNN():
             entropy += -torch.sum((log_prob * prob), 1)
         return log_probs, entropy
 
-    def sample(self, batch_size, max_length=250, return_smiles=False):
+    def sample(self, batch_size, max_length=250, return_smiles=False,
+               enable_grad=False):
         """
             Sample a batch of sequences
 
@@ -83,8 +84,9 @@ class RNN():
                                     currently used.
         """
         # turn on evaluation mode
-        self.rnn.eval();
-        with torch.no_grad():
+        if not enable_grad:
+            self.rnn.eval();
+        with torch.set_grad_enabled(enable_grad):
             start_token = Variable(torch.zeros(batch_size).long())
             start_token[:] = self.voc.vocab['GO']
             h = self.rnn.init_h(batch_size)
@@ -118,7 +120,8 @@ class RNN():
                 sequences = sequences.data
         
         # restore training mode
-        self.rnn.train();
+        if not enable_grad:
+            self.rnn.train();
         # return
         return sequences, log_probs, entropy
 
