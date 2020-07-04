@@ -122,6 +122,9 @@ def pretrain(restore_from=None):
             if early_stop.stop:
                 break
         
+        if early_stop.stop:
+                break
+        
         # log and sample SMILES every epoch
         track_loss(sched_file, Prior, moldata, epoch,
                    counter, loss.item(), args.batch_size)
