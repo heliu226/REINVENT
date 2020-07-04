@@ -75,6 +75,8 @@ def train_agent(scoring_function_kwargs=None,
     # Scoring_function
     if args.scoring_function == 'activity_model':
         scoring_function_kwargs = {'clf_path': args.clf_file}
+    else:
+        scoring_function_kwargs = {}
     
     scoring_function = get_scoring_function(scoring_function=args.scoring_function, 
                                             num_processes=num_processes,
