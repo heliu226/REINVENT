@@ -29,6 +29,9 @@ parser.add_argument('--scoring_function', type=str, default='activity_model',
 parser.add_argument('--clf_file', type=str)
 args = parser.parse_args()
 
+if not os.path.isdir(args.output_dir):
+    os.makedirs(args.output_dir)
+
 def train_agent(scoring_function_kwargs=None,
                 save_dir=None, 
                 learning_rate=0.0005,
