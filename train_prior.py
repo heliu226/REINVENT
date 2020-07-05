@@ -114,7 +114,7 @@ def pretrain(restore_from=None):
             # check early stopping
             validation = moldata.get_validation(args.batch_size).long()
             validation_logp, _ = Prior.likelihood(validation)
-            validation_loss = validation_logp.mean().detach()
+            validation_loss = -validation_logp.mean().detach()
             model_filename = "Prior.ckpt"
             model_file = os.path.join(args.output_dir, model_filename)
             early_stop(validation_loss.item(), Prior, model_file, counter)
