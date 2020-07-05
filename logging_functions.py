@@ -20,7 +20,7 @@ def track_loss(output_file, model, dataset, epoch, step_idx,
     sched = pd.DataFrame()
     validation = dataset.get_validation(batch_size).long()
     validation_logp, _ = model.likelihood(validation)
-    validation_loss = validation_logp.mean().detach().item()
+    validation_loss = -validation_logp.mean().detach().item()
     sched = pd.DataFrame({'epoch': epoch + 1, 'step': step_idx,
                           'outcome': ['training loss', 'validation loss'], 
                           'value': [training_loss, validation_loss]})
