@@ -31,7 +31,7 @@ def track_loss(output_file, model, dataset, epoch, step_idx,
     else:
         sched.to_csv(output_file, index=False, mode='a', header=False)
 
-def track_agent_loss(output_file, epoch, step_idx,
+def track_agent_loss(output_file, step_idx,
                      agent_likelihood, prior_likelihood,
                      augmented_likelihood, score):
     """
