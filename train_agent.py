@@ -14,7 +14,7 @@ from scoring_functions import get_scoring_function
 from utils import Variable, seq_to_smiles, fraction_valid_smiles, unique
 from vizard_logger import VizardLog
 
-from logging_functions import sample_smiles
+from logging_functions import sample_smiles, track_agent_loss
 
 # CLI
 parser = argparse.ArgumentParser()
@@ -55,7 +55,7 @@ def train_agent(scoring_function_kwargs=None,
     Agent = RNN(voc)
     
     logger = VizardLog('data/logs')
-
+    
     # By default restore Agent to same model as Prior, but can restore from already trained Agent too.
     # Saved models are partially on the GPU, but if we dont have cuda enabled we can remap these
     # to the CPU.
@@ -68,17 +68,11 @@ def train_agent(scoring_function_kwargs=None,
                                              storage, loc: storage))
         Agent.rnn.load_state_dict(torch.load(prior_file, map_location=lambda \
                                              storage, loc: storage))
-        
-    Prior.rnn.eval();
-    Agent.rnn.train();
 
     # We dont need gradients with respect to Prior
     for param in Prior.rnn.parameters():
         param.requires_grad = False
-    # ...but we do for the agent
-    for param in Agent.rnn.parameters():
-        param.requires_grad = True
-
+    
     optimizer = torch.optim.Adam(Agent.rnn.parameters(), lr=0.0005)
 
     # Scoring_function
@@ -109,6 +103,7 @@ def train_agent(scoring_function_kwargs=None,
     print("Model initialized, starting training...")
 
     sample_every_steps = 50
+    sched_file = os.path.join(args.output_dir, 'loss_schedule.csv')
     for step in range(args.n_steps):
 
         # Sample from Agent
@@ -187,8 +182,13 @@ def train_agent(scoring_function_kwargs=None,
                             (smiles[:12], score[:12])]), "SMILES", dtype="text", overwrite=True)
         logger.log(np.array(step_score), "Scores")
         
-        # sample from the model every n steps
+        # log and sample SMILES every n steps
         if step % sample_every_steps == 0:
+            track_agent_loss(sched_file, step,
+                             agent_likelihood.mean(),
+                             prior_likelihood.mean(),
+                             augmented_likelihood.mean(),
+                             score.mean())
             epoch = -1
             sample_smiles(args.output_dir, args.seed, Agent, 
                           args.sample_size, epoch, step)

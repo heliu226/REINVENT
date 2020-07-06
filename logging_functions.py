@@ -31,6 +31,28 @@ def track_loss(output_file, model, dataset, epoch, step_idx,
     else:
         sched.to_csv(output_file, index=False, mode='a', header=False)
 
+def track_agent_loss(output_file, epoch, step_idx,
+                     agent_likelihood, prior_likelihood,
+                     augmented_likelihood, score):
+    """
+    Log losses from Agent RL training to a file.
+    """
+    sched = pd.DataFrame({'step': step_idx,
+                          'outcome': ['prior likelihood',
+                                      'agent likelihood',
+                                      'augmented likelihood',
+                                      'score'], 
+                          'value': [prior_likelihood,
+                                    agent_likelihood, 
+                                    augmented_likelihood,
+                                    score]})
+        
+    # write training schedule (write header if file does not exist)
+    if not os.path.isfile(output_file) or step_idx == 0:
+        sched.to_csv(output_file, index=False)
+    else:
+        sched.to_csv(output_file, index=False, mode='a', header=False)
+
 def sample_smiles(output_dir, sample_idx, model, sample_size, epoch, 
                   step_idx): 
     """
