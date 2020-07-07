@@ -84,7 +84,7 @@ class activity_model():
         fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2)
         arr = np.zeros((1,))
         DataStructs.ConvertToNumpyArray(fp, arr)
-        return arr
+        return arr.reshape(1, -1)
 
 class Worker():
     """A worker class for the Multiprocessing functionality. Spawns a subprocess
