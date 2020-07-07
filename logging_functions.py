@@ -33,7 +33,7 @@ def track_loss(output_file, model, dataset, epoch, step_idx,
 
 def track_agent_loss(output_file, step_idx,
                      agent_likelihood, prior_likelihood,
-                     augmented_likelihood, score):
+                     augmented_likelihood, score, mean_active):
     """
     Log losses from Agent RL training to a file.
     """
@@ -41,11 +41,13 @@ def track_agent_loss(output_file, step_idx,
                           'outcome': ['prior likelihood',
                                       'agent likelihood',
                                       'augmented likelihood',
-                                      'score'], 
+                                      'score',
+                                      'mean active'], 
                           'value': [prior_likelihood,
                                     agent_likelihood, 
                                     augmented_likelihood,
-                                    score]})
+                                    score,
+                                    mean_active]})
         
     # write training schedule (write header if file does not exist)
     if not os.path.isfile(output_file) or step_idx == 0:

@@ -14,6 +14,8 @@ from scoring_functions import get_scoring_function
 from utils import Variable, seq_to_smiles, fraction_valid_smiles, unique
 from vizard_logger import VizardLog
 
+from functions import clean_mols
+from scoring_functions import activity_model
 from logging_functions import sample_smiles, track_agent_loss
 
 # CLI
@@ -120,6 +122,15 @@ def train_agent(scoring_function_kwargs=None,
         prior_likelihood, _ = Prior.likelihood(Variable(seqs))
         smiles = seq_to_smiles(seqs, voc)
         score = scoring_function(smiles)
+        
+        ## also calculate % predicted active
+        if args.scoring_function == 'activity_model':
+            mols = [mol for mol in clean_mols(smiles) if mol]
+            fps = [activity_model.fingerprints_from_mol(mol) for mol in mols]
+            predictions = [activity_model.clf.predict(fp) for fp in fps]
+            mean_active = np.mean(np.asarray(predictions))
+        else:
+            mean_active = np.NaN
          
         # Calculate augmented likelihood
         augmented_likelihood = prior_likelihood + sigma * Variable(score)
@@ -188,7 +199,8 @@ def train_agent(scoring_function_kwargs=None,
                              agent_likelihood.mean(),
                              prior_likelihood.mean(),
                              augmented_likelihood.mean(),
-                             score.mean())
+                             score.mean(),
+                             mean_active)
             epoch = -1
             sample_smiles(args.output_dir, args.seed, Agent, 
                           args.sample_size, epoch, step)
