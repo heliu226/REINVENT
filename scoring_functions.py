@@ -81,13 +81,10 @@ class activity_model():
 
     @classmethod
     def fingerprints_from_mol(cls, mol):
-        fp = AllChem.GetMorganFingerprint(mol, 3, useCounts=True, useFeatures=True)
-        size = 2048
-        nfp = np.zeros((1, size), np.int32)
-        for idx,v in fp.GetNonzeroElements().items():
-            nidx = idx%size
-            nfp[0, nidx] += int(v)
-        return nfp
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2)
+        arr = np.zeros((1,))
+        DataStructs.ConvertToNumpyArray(fp, arr)
+        return arr
 
 class Worker():
     """A worker class for the Multiprocessing functionality. Spawns a subprocess
