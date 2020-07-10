@@ -7,6 +7,7 @@ import numpy as np
 import time
 import os
 import random
+from rdkit import Chem
 
 from model import RNN
 from data_structs import Vocabulary, Experience
@@ -14,7 +15,6 @@ from scoring_functions import get_scoring_function
 from utils import Variable, seq_to_smiles, fraction_valid_smiles, unique
 from vizard_logger import VizardLog
 
-from functions import clean_mols
 from scoring_functions import activity_model
 from logging_functions import sample_smiles, track_agent_loss
 
@@ -126,7 +126,7 @@ def train_agent(scoring_function_kwargs=None,
         
         ## also calculate % predicted active
         if args.scoring_function == 'activity_model':
-            mols = [mol for mol in clean_mols(smiles) if mol]
+            mols = [Chem.MolFromSmiles(sm) for sm in smiles]
             fps = [activity_model.fingerprints_from_mol(mol) for mol in mols]
             predictions = [activity_model.clf.predict(fp) for fp in fps]
             mean_active = np.mean(np.asarray(predictions))
