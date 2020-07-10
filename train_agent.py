@@ -105,7 +105,7 @@ def train_agent(scoring_function_kwargs=None,
     
     print("Model initialized, starting training...")
 
-    sample_every_steps = 50
+    sample_every_steps = 10
     sched_file = os.path.join(args.output_dir, 'loss_schedule.csv')
     for step in range(args.n_steps):
 
