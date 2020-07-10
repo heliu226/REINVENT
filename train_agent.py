@@ -127,9 +127,9 @@ def train_agent(scoring_function_kwargs=None,
         ## also calculate % predicted active
         if args.scoring_function == 'activity_model':
             mols = [Chem.MolFromSmiles(sm) for sm in smiles]
-            fps = [activity_model.fingerprints_from_mol(mol) for mol in mols \
-                   if mol]
-            predictions = [activity_model.clf.predict(fp) for fp in fps]
+            fps = [scoring_function.fingerprints_from_mol(mol) \
+                   for mol in mols if mol]
+            predictions = [scoring_function.clf.predict(fp) for fp in fps]
             mean_active = np.mean(np.asarray(predictions))
         else:
             mean_active = np.NaN
