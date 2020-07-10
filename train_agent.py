@@ -125,11 +125,13 @@ def train_agent(scoring_function_kwargs=None,
         score = scoring_function(smiles)
         
         ## also calculate % predicted active
-        if args.scoring_function == 'activity_model':
+        if step % sample_every_steps == 0 and \
+                args.scoring_function == 'activity_model':
             mols = [Chem.MolFromSmiles(sm) for sm in smiles]
-            fps = [scoring_function.fingerprints_from_mol(mol) \
+            fps = [activity_model.fingerprints_from_mol(mol) \
                    for mol in mols if mol]
-            predictions = [scoring_function.clf.predict(fp) for fp in fps]
+            clf = scoring_function.scoring_function.clf
+            predictions = [clf.predict(fp) for fp in fps]
             mean_active = np.mean(np.asarray(predictions))
         else:
             mean_active = np.NaN
