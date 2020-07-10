@@ -29,6 +29,7 @@ parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--scoring_function', type=str, default='activity_model',
                     choices=['activity_model', 'tanimoto', 'no_sulphur'])
 parser.add_argument('--clf_file', type=str)
+parser.add_argument('--regularization', action='store_true')
 args = parser.parse_args()
 
 if not os.path.isdir(args.output_dir):
@@ -155,8 +156,9 @@ def train_agent(scoring_function_kwargs=None,
         loss = loss.mean()
 
         # Add regularizer that penalizes high likelihood for the entire sequence
-        loss_p = - (1 / agent_likelihood).mean()
-        loss += 5 * 1e3 * loss_p
+        if args.regularization:
+            loss_p = - (1 / agent_likelihood).mean()
+            loss += 5 * 1e3 * loss_p
 
         # Calculate gradients and make an update to the network weights
         optimizer.zero_grad()
