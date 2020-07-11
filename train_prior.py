@@ -28,6 +28,7 @@ parser.add_argument('--sample_size', type=int, default=10000)
 parser.add_argument('--patience', type=int, default=10000)
 parser.add_argument('--batch_size', type=int, default=64)
 parser.add_argument('--seed', type=int, default=0)
+parser.add_argument('--max_epochs', type=int, default=5)
 args = parser.parse_args()
 
 if not os.path.isdir(args.output_dir):
@@ -66,7 +67,7 @@ def pretrain(restore_from=None):
     log_every_steps = 50
     sample_every_steps = 500
     sched_file = os.path.join(args.output_dir, 'loss_schedule.csv')
-    for epoch in range(1, 6):
+    for epoch in range(1, args.max_epochs + 1):
         # When training on a few million compounds, this model converges
         # in a few of epochs or even faster. If model sized is increased
         # its probably a good idea to check loss against an external set of
