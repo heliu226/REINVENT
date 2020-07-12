@@ -25,6 +25,7 @@ parser.add_argument('--prior_dir', type=str)
 parser.add_argument('--output_dir', type=str)
 parser.add_argument('--sample_size', type=int, default=10000)
 parser.add_argument('--n_steps', type=int, default=5000)
+parser.add_argument('--sample_every_steps', type=int, default=10)
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--scoring_function', type=str, default='activity_model',
                     choices=['activity_model', 'tanimoto', 'no_sulphur'])
@@ -105,7 +106,6 @@ def train_agent(scoring_function_kwargs=None,
     
     print("Model initialized, starting training...")
 
-    sample_every_steps = 10
     sched_file = os.path.join(args.output_dir, 'loss_schedule.csv')
     for step in range(args.n_steps):
 
@@ -125,7 +125,7 @@ def train_agent(scoring_function_kwargs=None,
         score = scoring_function(smiles)
         
         ## also calculate % predicted active
-        if step % sample_every_steps == 0 and \
+        if step % args.sample_every_steps == 0 and \
                 args.scoring_function == 'activity_model':
             mols = [Chem.MolFromSmiles(sm) for sm in smiles]
             fps = [activity_model.fingerprints_from_mol(mol) \
@@ -199,7 +199,7 @@ def train_agent(scoring_function_kwargs=None,
         logger.log(np.array(step_score), "Scores")
         
         # log and sample SMILES every n steps
-        if step % sample_every_steps == 0:
+        if step % args.sample_every_steps == 0:
             track_agent_loss(sched_file, step,
                              agent_likelihood.mean(),
                              prior_likelihood.mean(),
